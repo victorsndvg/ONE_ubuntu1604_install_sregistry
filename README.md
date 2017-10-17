@@ -1,0 +1,2 @@
+# ONE_ubuntu1604_install_sregistry
+SRegistry installation bash script
