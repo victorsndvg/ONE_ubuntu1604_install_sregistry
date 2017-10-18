@@ -36,21 +36,42 @@ sed -i 's/'$LOCALHOST_IP'\b/'$EXTERNAL_IP'/g' $SREGISTRY_AUTH_FILE
 sed -i 's/'$LOCALHOST_IP'\b/'$EXTERNAL_IP'/g' $SREGISTRY_CONFIG_FILE
 
 echo ""
+echo "Creating Certs if needed and configuring https..."
+if [ ! -f /etc/ssl/private/domain.key ] || [ ! -f /etc/ssl/certs/chained.pem ]; then
+    openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/domain.key -out /etc/ssl/certs/chained.pem
+fi
+if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
+    openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
+fi
+
+# HTTPS configuration
+mkdir -p $SREGISTRY_DIR/http
+cp nginx.conf $REGISTRY_DIR/http/nginx.conf
+cp docker-compose.yml $SREGISTRY_DIR/http/docker-compose.yml
+
+cp $SREGISTRY_DIR/https/docker-compose.yml $SREGISTRY_DIR/docker-compose.yml
+cp $SREGISTRY_DIR/https/nginx.conf.https $SREGISTRY_DIR/nginx.conf
+
+
+echo ""
 echo "Please follow this steps to enable Oauth2 login with twitter:"
 echo "============================================================="
 echo "1. Register the app in https://apps.twitter.com/ and press [ENTER]"
 echo "       Website: http://$EXTERNAL_IP"
 echo "       Callback URL: http://$EXTERNAL_IP/complete/twitter"
 read NULL
-echo "2. Write the Twitter 'Consumer Key' and press [ENTER]"
+echo "2. Write a Django secret key and press [ENTER]"
+echo "       You can generate it in https://www.miniwebtool.com/django-secret-key-generator/"
+read -p "  Secret Key: " SECRET_KEY
+echo "3. Write the Twitter 'Consumer Key' and press [ENTER]"
 read -p "  API Key: " TWITTER_KEY
-echo "3. Write the Twitter 'Consumer Secret' and press [ENTER]"
+echo "4. Write the Twitter 'Consumer Secret' and press [ENTER]"
 read -p "  API Secret: " TWITTER_SECRET
 
 
 
 echo "
-SECRET_KEY = 'bh%@5#32uu3e=g&-iwj*ppr)-qhh-73m=ok%vwbs-b!4x4=slj'
+SECRET_KEY = '$SECRET_KEY'
 SOCIAL_AUTH_TWITTER_KEY = '$TWITTER_KEY'
 SOCIAL_AUTH_TWITTER_SECRET = '$TWITTER_SECRET'
 " > $SREGISTRY_SECRETS_FILE
@@ -69,9 +90,9 @@ echo -e " Done!\c"
 echo ""
 
 
-echo "4. Open and sign-in into the SRegistry web service (http://$EXTERNAL_IP) and press [ENTER]"
+echo "5. Open and sign-in into the SRegistry web service (http://$EXTERNAL_IP) and press [ENTER]"
 read NULL
-echo "5. Write the username used to sign-in and press [ENTER]"
+echo "6. Write the username used to sign-in and press [ENTER]"
 read -p "Username: " USERNAME
 echo ""
 
@@ -137,6 +158,7 @@ python setup.py install
 #make install
 
 # Singularity 2.4
+cd $BUILD_DIR
 VERSION=2.4
 wget https://github.com/singularityware/singularity/releases/download/$VERSION/singularity-$VERSION.tar.gz
 tar xvf singularity-$VERSION.tar.gz
