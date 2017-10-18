@@ -25,6 +25,9 @@ apt-get install -y docker.io docker-compose
 
 #if false; then
 git clone https://github.com/singularityhub/sregistry.git $SREGISTRY_DIR
+cd $SREGISTRY_DIR
+## Commit message: adjusting urls to prevent 301 redirect, and appending to delete function
+#git checkout 8d2a8c02f726d474dad05d4bcb32b65947f61745
 
 # Configure
 SREGISTRY_CONFIG_DIR=$SREGISTRY_DIR/shub/settings
@@ -35,22 +38,22 @@ SREGISTRY_SECRETS_FILE=$SREGISTRY_CONFIG_DIR/secrets.py
 sed -i 's/'$LOCALHOST_IP'\b/'$EXTERNAL_IP'/g' $SREGISTRY_AUTH_FILE
 sed -i 's/'$LOCALHOST_IP'\b/'$EXTERNAL_IP'/g' $SREGISTRY_CONFIG_FILE
 
-echo ""
-echo "Creating Certs if needed and configuring https..."
-if [ ! -f /etc/ssl/private/domain.key ] || [ ! -f /etc/ssl/certs/chained.pem ]; then
-    openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/domain.key -out /etc/ssl/certs/chained.pem
-fi
-if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
-    openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
-fi
+#echo ""
+#echo "Creating Certs if needed and configuring https..."
+#if [ ! -f /etc/ssl/private/domain.key ] || [ ! -f /etc/ssl/certs/chained.pem ]; then
+#    openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/domain.key -out /etc/ssl/certs/chained.pem
+#fi
+#if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
+#    openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
+#fi
 
 # HTTPS configuration
-mkdir -p $SREGISTRY_DIR/http
-cp nginx.conf $REGISTRY_DIR/http/nginx.conf
-cp docker-compose.yml $SREGISTRY_DIR/http/docker-compose.yml
-
-cp $SREGISTRY_DIR/https/docker-compose.yml $SREGISTRY_DIR/docker-compose.yml
-cp $SREGISTRY_DIR/https/nginx.conf.https $SREGISTRY_DIR/nginx.conf
+#mkdir -p $SREGISTRY_DIR/http
+#cp nginx.conf $REGISTRY_DIR/http/nginx.conf
+#cp docker-compose.yml $SREGISTRY_DIR/http/docker-compose.yml
+#
+#cp $SREGISTRY_DIR/https/docker-compose.yml $SREGISTRY_DIR/docker-compose.yml
+#cp $SREGISTRY_DIR/https/nginx.conf.https $SREGISTRY_DIR/nginx.conf
 
 
 echo ""
@@ -80,7 +83,6 @@ SOCIAL_AUTH_TWITTER_SECRET = '$TWITTER_SECRET'
 
 echo ""
 echo -e "  Waiting for the nginx server to be up \c"
-cd $SREGISTRY_DIR
 docker-compose stop  &>/dev/null
 docker-compose rm -f &>/dev/null
 docker-compose up -d &>/dev/null
@@ -138,6 +140,11 @@ echo $TOKEN > $HOME/.sregistry
 # Singularity-python requeriments
 git clone -b development https://github.com/vsoch/singularity-python.git $SINGULARITY_PYTHON_DIR
 cd $SINGULARITY_PYTHON_DIR
+# Next commit does not work with python 2.7(updating timestamp function to specify timezone utc)
+# ImportError: cannot import name timezone
+# This commit works
+git checkout c46d0956a4e7581f9ebcbef122743aca94f90258
+
 pip install numpy scikit-learn cython pandas setuptools pyasn1==0.3.4
 pip install -r requirements.txt 
 
