@@ -128,9 +128,19 @@ python setup.py install
 # Singularity: sregistry executable command
 #############################################################################
 
-git clone https://github.com/singularityware/singularity.git $SINGULARITY_DIR
-cd $SINGULARITY_DIR
-./autogen.sh
+## Singularity Master branch
+#git clone https://github.com/singularityware/singularity.git $SINGULARITY_DIR
+#cd $SINGULARITY_DIR
+#./autogen.sh
+#./configure --prefix=/usr/local
+#make
+#make install
+
+# Singularity 2.4
+VERSION=2.4
+wget https://github.com/singularityware/singularity/releases/download/$VERSION/singularity-$VERSION.tar.gz
+tar xvf singularity-$VERSION.tar.gz
+cd singularity-$VERSION
 ./configure --prefix=/usr/local
 make
-make install
+sudo make install
