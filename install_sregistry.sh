@@ -15,9 +15,23 @@ LOCALHOST_IP="127.0.0.1"
 
 mkdir -p $ROOT_DIR $BUILD_DIR
 
-apt-get update
-apt-get install -y gcc make python python-pip libtool automake git
-apt-get install -y docker.io docker-compose
+echo ""
+echo "Updating Ubuntu repositories. Please wait ..."
+apt-get update &> /dev/null
+echo ""
+echo "Installing sofware requirements. Please wait ..."
+apt-get install -y gcc make python python-pip libtool automake git &> /dev/null
+apt-get install -y docker.io docker-compose &> /dev/null
+
+# Not working yet
+#bash -x generate_certs.sh $BUILD_DIR 
+#if [ $? -ne 0 ]; then
+#    echo "[ERROR] Cert generation failed!"
+#    echo "Aborting ..."
+#    exit 1
+#fi
+
+exit 0
 
 #############################################################################
 # SRegistry: web service
@@ -38,16 +52,7 @@ SREGISTRY_SECRETS_FILE=$SREGISTRY_CONFIG_DIR/secrets.py
 sed -i 's/'$LOCALHOST_IP'\b/'$EXTERNAL_IP'/g' $SREGISTRY_AUTH_FILE
 sed -i 's/'$LOCALHOST_IP'\b/'$EXTERNAL_IP'/g' $SREGISTRY_CONFIG_FILE
 
-#echo ""
-#echo "Creating Certs if needed and configuring https..."
-#if [ ! -f /etc/ssl/private/domain.key ] || [ ! -f /etc/ssl/certs/chained.pem ]; then
-#    openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/domain.key -out /etc/ssl/certs/chained.pem
-#fi
-#if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
-#    openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
-#fi
-
-# HTTPS configuration
+## HTTPS configuration
 #mkdir -p $SREGISTRY_DIR/http
 #cp nginx.conf $REGISTRY_DIR/http/nginx.conf
 #cp docker-compose.yml $SREGISTRY_DIR/http/docker-compose.yml
@@ -82,7 +87,7 @@ SOCIAL_AUTH_TWITTER_SECRET = '$TWITTER_SECRET'
 # Deploy
 
 echo ""
-echo -e "  Waiting for the nginx server to be up \c"
+echo -e " > Waiting for the nginx server to be up \c"
 docker-compose stop  &>/dev/null
 docker-compose rm -f &>/dev/null
 docker-compose up -d &>/dev/null
