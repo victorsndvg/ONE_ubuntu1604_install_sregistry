@@ -23,8 +23,8 @@ echo "Installing sofware requirements. Please wait ..."
 apt-get install -y gcc make libtool automake git &> /dev/null
 #apt-get install -y gcc make python python-pip libtool automake git &> /dev/null
 apt-get install -y docker.io docker-compose &> /dev/null
-wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash Miniconda3-latest-Linux-x86_64.sh -b -f -u -t -p /usr/local
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh &> /dev/null
+bash Miniconda3-latest-Linux-x86_64.sh -b -f -u -p /usr/local &> /dev/null
 
 # Not working yet
 #bash -x generate_certs.sh $BUILD_DIR 
@@ -39,6 +39,10 @@ bash Miniconda3-latest-Linux-x86_64.sh -b -f -u -t -p /usr/local
 # Singularity-python: sregistry executable command
 #############################################################################
 
+echo ""
+echo "[INSTALL] Singularity-python"
+echo ""
+
 # Singularity-python requeriments
 git clone -b development https://github.com/vsoch/singularity-python.git $SINGULARITY_PYTHON_DIR
 cd $SINGULARITY_PYTHON_DIR
@@ -51,11 +55,11 @@ then
     exit 1
 fi
 
-conda install -y numpy scikit-learn cython pandas
-pip install setuptools
-pip install -r requirements.txt
-pip install pyasn1==0.3.4
-python setup.py sdist
+conda install -y numpy scikit-learn cython pandas &> /dev/null
+pip install setuptools &> /dev/null
+pip install -r requirements.txt &> /dev/null
+pip install pyasn1==0.3.4 &> /dev/null
+python setup.py sdist 
 python setup.py install
 
 ## Next commit does not work with python 2.7(updating timestamp function to specify timezone utc)
@@ -73,6 +77,10 @@ python setup.py install
 #############################################################################
 # Singularity: sregistry executable command
 #############################################################################
+
+echo ""
+echo "[INSTALL] Singularity"
+echo ""
 
 ## Singularity Master branch
 #git clone https://github.com/singularityware/singularity.git $SINGULARITY_DIR
@@ -96,6 +104,10 @@ sudo make install
 #############################################################################
 # SRegistry: web service
 #############################################################################
+
+echo ""
+echo "[INSTALL] SRegistry"
+echo ""
 
 #if false; then
 git clone https://github.com/singularityhub/sregistry.git $SREGISTRY_DIR
