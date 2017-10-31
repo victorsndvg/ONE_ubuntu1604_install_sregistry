@@ -142,11 +142,11 @@ echo "       Callback URL: http://$EXTERNAL_IP/complete/twitter"
 read NULL
 echo "2. Write a Django secret key and press [ENTER]"
 echo "       You can generate it in https://www.miniwebtool.com/django-secret-key-generator/"
-read -p "  Secret Key: " SECRET_KEY
+read -p "    Secret Key: " SECRET_KEY
 echo "3. Write the Twitter 'Consumer Key' and press [ENTER]"
-read -p "  API Key: " TWITTER_KEY
+read -p "    API Key: " TWITTER_KEY
 echo "4. Write the Twitter 'Consumer Secret' and press [ENTER]"
-read -p "  API Secret: " TWITTER_SECRET
+read -p "    API Secret: " TWITTER_SECRET
 
 
 
@@ -159,10 +159,11 @@ SOCIAL_AUTH_TWITTER_SECRET = '$TWITTER_SECRET'
 # Deploy
 
 echo ""
-echo -e " > Waiting for the nginx server to be up \c"
+echo " > Deploying docker containers ..."
 docker-compose stop  &>/dev/null
 docker-compose rm -f &>/dev/null
 docker-compose up -d &>/dev/null
+echo -e " > Waiting for the nginx server to be up \c"
 # wait for sregistry_nginx_1 to request username
 while [[ ! $(curl -sL -w "%{http_code}\\n" "http://$EXTERNAL_IP" -o /dev/null --connect-timeout 3 --max-time 5) == "200" ]];  do echo -e ".\c"; sleep 1; done
 echo -e " Done!\c"
@@ -172,7 +173,7 @@ echo ""
 echo "5. Open and sign-in into the SRegistry web service (http://$EXTERNAL_IP) and press [ENTER]"
 read NULL
 echo "6. Write the username used to sign-in and press [ENTER]"
-read -p "Username: " USERNAME
+read -p "    Username: " USERNAME
 echo ""
 
 # wait for sregistry_uwsgi_1 to add superuser and admin
@@ -202,8 +203,8 @@ fi
 docker exec ${NAME} python manage.py register
 
 echo ""
-echo "Please, write the full token (http://$EXTERNAL_IP/token) and press [ENTER]:"
-read -p "Token: " TOKEN
+echo "Please, write the full JSON token (http://$EXTERNAL_IP/token) and press [ENTER]:"
+read -p "    Token: " TOKEN
 echo ""
 
 echo $TOKEN > $HOME/.sregistry
