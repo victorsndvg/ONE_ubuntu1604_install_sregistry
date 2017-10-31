@@ -20,8 +20,11 @@ echo "Updating Ubuntu repositories. Please wait ..."
 apt-get update &> /dev/null
 echo ""
 echo "Installing sofware requirements. Please wait ..."
-apt-get install -y gcc make python python-pip libtool automake git &> /dev/null
+apt-get install -y gcc make libtool automake git &> /dev/null
+#apt-get install -y gcc make python python-pip libtool automake git &> /dev/null
 apt-get install -y docker.io docker-compose &> /dev/null
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh -b -f -u -t -p /usr/local
 
 # Not working yet
 #bash -x generate_certs.sh $BUILD_DIR 
@@ -30,6 +33,65 @@ apt-get install -y docker.io docker-compose &> /dev/null
 #    echo "Aborting ..."
 #    exit 1
 #fi
+
+
+#############################################################################
+# Singularity-python: sregistry executable command
+#############################################################################
+
+# Singularity-python requeriments
+git clone -b development https://github.com/vsoch/singularity-python.git $SINGULARITY_PYTHON_DIR
+cd $SINGULARITY_PYTHON_DIR
+
+PYTHON_VERSION=`python -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
+if [ ! $PYTHON_VERSION == 3 ] 
+then 
+    echo "[ERROR] Python > 3 required"
+    echo "Aborting ..."
+    exit 1
+fi
+
+conda install -y numpy scikit-learn cython pandas
+pip install setuptools
+pip install -r requirements.txt
+pip install pyasn1==0.3.4
+python setup.py sdist
+python setup.py install
+
+## Next commit does not work with python 2.7(updating timestamp function to specify timezone utc)
+## ImportError: cannot import name timezone
+## This commit works
+#git checkout c46d0956a4e7581f9ebcbef122743aca94f90258
+#
+#pip install numpy scikit-learn cython pandas setuptools pyasn1==0.3.4
+#pip install -r requirements.txt 
+#
+## Installation
+#python setup.py sdist
+#python setup.py install
+
+#############################################################################
+# Singularity: sregistry executable command
+#############################################################################
+
+## Singularity Master branch
+#git clone https://github.com/singularityware/singularity.git $SINGULARITY_DIR
+#cd $SINGULARITY_DIR
+#./autogen.sh
+#./configure --prefix=/usr/local
+#make
+#make install
+
+# Singularity 2.4
+cd $BUILD_DIR
+VERSION=2.4
+wget https://github.com/singularityware/singularity/releases/download/$VERSION/singularity-$VERSION.tar.gz
+tar xvf singularity-$VERSION.tar.gz
+cd singularity-$VERSION
+./configure --prefix=/usr/local
+make
+sudo make install
+
 
 #############################################################################
 # SRegistry: web service
@@ -136,43 +198,3 @@ echo $TOKEN > $HOME/.sregistry
 
 
 #fi
-#############################################################################
-# Singularity-python: sregistry executable command
-#############################################################################
-
-# Singularity-python requeriments
-git clone -b development https://github.com/vsoch/singularity-python.git $SINGULARITY_PYTHON_DIR
-cd $SINGULARITY_PYTHON_DIR
-# Next commit does not work with python 2.7(updating timestamp function to specify timezone utc)
-# ImportError: cannot import name timezone
-# This commit works
-git checkout c46d0956a4e7581f9ebcbef122743aca94f90258
-
-pip install numpy scikit-learn cython pandas setuptools pyasn1==0.3.4
-pip install -r requirements.txt 
-
-# Installation
-python setup.py sdist
-python setup.py install
-
-#############################################################################
-# Singularity: sregistry executable command
-#############################################################################
-
-## Singularity Master branch
-#git clone https://github.com/singularityware/singularity.git $SINGULARITY_DIR
-#cd $SINGULARITY_DIR
-#./autogen.sh
-#./configure --prefix=/usr/local
-#make
-#make install
-
-# Singularity 2.4
-cd $BUILD_DIR
-VERSION=2.4
-wget https://github.com/singularityware/singularity/releases/download/$VERSION/singularity-$VERSION.tar.gz
-tar xvf singularity-$VERSION.tar.gz
-cd singularity-$VERSION
-./configure --prefix=/usr/local
-make
-sudo make install
