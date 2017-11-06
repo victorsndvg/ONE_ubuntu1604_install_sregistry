@@ -44,7 +44,8 @@ echo "[INSTALL] Singularity-python"
 echo ""
 
 # Singularity-python requeriments
-git clone -b development https://github.com/vsoch/singularity-python.git $SINGULARITY_PYTHON_DIR
+#git clone -b development https://github.com/vsoch/singularity-python.git $SINGULARITY_PYTHON_DIR
+git clone https://github.com/singularityware/singularity-python.git $SINGULARITY_PYTHON_DIR
 cd $SINGULARITY_PYTHON_DIR
 
 PYTHON_VERSION=`python -c "import sys;t='{v[0]}'.format(v=list(sys.version_info[:2]));sys.stdout.write(t)";`
@@ -136,20 +137,42 @@ sed -i 's/'$LOCALHOST_IP'\b/'$EXTERNAL_IP'/g' $SREGISTRY_CONFIG_FILE
 echo ""
 echo "Please follow this steps to enable Oauth2 login with twitter:"
 echo "============================================================="
-echo "1. Register the app in https://apps.twitter.com/ and press [ENTER]"
+echo "1.  Write your twitter username and press [ENTER]"
+read -p "       Username: " USERNAME
+echo "2.  Write you email account and press [ENTER]"
+read -p "       Email: " EMAIL
+echo "3.  Write your institution website and press [ENTER]"
+read -p "       URL: " WEBSITE
+echo "4.  Write the registry name and press [ENTER]"
+read -p "       Registry name: " REGISTRY_NAME
+echo "5.  Write the registry URI and press [ENTER]"
+read -p "       URI: " REGISTRY URI
+echo "6.  Register the app in https://apps.twitter.com/ and press [ENTER]"
 echo "       Website: http://$EXTERNAL_IP"
 echo "       Callback URL: http://$EXTERNAL_IP/complete/twitter"
 read NULL
-echo "2. Write a Django secret key and press [ENTER]"
+echo "7.  Write a Django secret key and press [ENTER]"
 echo "       You can generate it in https://www.miniwebtool.com/django-secret-key-generator/"
-read -p "    Secret Key: " SECRET_KEY
-echo "3. Write the Twitter 'Consumer Key' and press [ENTER]"
-read -p "    API Key: " TWITTER_KEY
-echo "4. Write the Twitter 'Consumer Secret' and press [ENTER]"
-read -p "    API Secret: " TWITTER_SECRET
+read -p "       Secret Key: " SECRET_KEY
+echo "8.  Write the Twitter 'Consumer Key' and press [ENTER]"
+read -p "       API Key: " TWITTER_KEY
+echo "9.  Write the Twitter 'Consumer Secret' and press [ENTER]"
+read -p "       API Secret: " TWITTER_SECRET
+echo "10.  Should the default for a new registry be private? [y|n] [ENTER]"
+read -p "       Choose your option (default:n) [y|n]: " DEFAULT_PRIVATE
 
+# Replace configuration in config.py
+if [[ $DEFAULT_PRIVATE == "y" || $DEFAULT_PRIVATE == "Y" || $DEFAULT_PRIVATE == "yes" || $DEFAULT_PRIVATE == "YES" ]]; then
+    sed -i '/^DEFAULT_PRIVATE/ s/False\b/True/g' $SREGISTRY_CONFIG_FILE
+fi
+sed -i "/^ADMINS/ s/vsochat@gmail\.com\b/$EMAIL/g" $SREGISTRY_CONFIG_FILE
+sed -i "/^ADMINS/ s/vsochat\.com\b/$USERNAME/g" $SREGISTRY_CONFIG_FILE
+sed -i "/^HELP_CONTACT_EMAIL/ s/vsochat@stanford\.edu\b/$EMAIL/g" $SREGISTRY_CONFIG_FILE
+sed -i "/^HELP_INSTITUTION_SITE/ s/srcc\.stanford\.edu\b/$WEBSITE/g" $SREGISTRY_CONFIG_FILE
+sed -i "/^REGISTRY_NAME/ s/Tacosaurus Computing Center\b/$REGISTRY_NAME/g" $SREGISTRY_CONFIG_FILE
+sed -i "/^REGISTRY_URI/ s/taco\b/$REGISTRY_URI/g" $REGISTRY_CONFIG_FILE
 
-
+# Write authentication settings to secrets file
 echo "
 SECRET_KEY = '$SECRET_KEY'
 SOCIAL_AUTH_TWITTER_KEY = '$TWITTER_KEY'
@@ -170,10 +193,8 @@ echo -e " Done!\c"
 echo ""
 
 
-echo "5. Open and sign-in into the SRegistry web service (http://$EXTERNAL_IP) and press [ENTER]"
+echo "11. Open and sign-in into the SRegistry web service (http://$EXTERNAL_IP) with the twitter account and press [ENTER]"
 read NULL
-echo "6. Write the username used to sign-in and press [ENTER]"
-read -p "    Username: " USERNAME
 echo ""
 
 # wait for sregistry_uwsgi_1 to add superuser and admin
@@ -203,8 +224,8 @@ fi
 docker exec ${NAME} python manage.py register
 
 echo ""
-echo "Please, write the full JSON token (http://$EXTERNAL_IP/token) and press [ENTER]:"
-read -p "    Token: " TOKEN
+echo "12. Please, write the full JSON token (http://$EXTERNAL_IP/token) and press [ENTER]:"
+read -p "       Token: " TOKEN
 echo ""
 
 echo $TOKEN > $HOME/.sregistry
