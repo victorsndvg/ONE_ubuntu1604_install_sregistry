@@ -166,7 +166,7 @@ if [[ $DEFAULT_PRIVATE == "y" || $DEFAULT_PRIVATE == "Y" || $DEFAULT_PRIVATE == 
     sed -i '/^DEFAULT_PRIVATE/ s/False\b/True/g' $SREGISTRY_CONFIG_FILE
 fi
 sed -i "/^ADMINS/ s/vsochat@gmail\.com\b/$EMAIL/g" $SREGISTRY_CONFIG_FILE
-sed -i "/^ADMINS/ s/vsochat\.com\b/$USERNAME/g" $SREGISTRY_CONFIG_FILE
+sed -i "/^ADMINS/ s/vsochat\b/$USERNAME/g" $SREGISTRY_CONFIG_FILE
 sed -i "/^HELP_CONTACT_EMAIL/ s/vsochat@stanford\.edu\b/$EMAIL/g" $SREGISTRY_CONFIG_FILE
 sed -i "/^HELP_INSTITUTION_SITE/ s/srcc\.stanford\.edu\b/$WEBSITE/g" $SREGISTRY_CONFIG_FILE
 sed -i "/^REGISTRY_NAME/ s/Tacosaurus Computing Center\b/$REGISTRY_NAME/g" $SREGISTRY_CONFIG_FILE
