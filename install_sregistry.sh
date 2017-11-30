@@ -59,7 +59,7 @@ fi
 conda install -y numpy scikit-learn cython pandas &> /dev/null
 pip install setuptools &> /dev/null
 pip install -r requirements.txt &> /dev/null
-pip install pyasn1==0.3.4 &> /dev/null
+pip install pyasn1==0.4.1 &> /dev/null
 python setup.py sdist 
 python setup.py install
 
