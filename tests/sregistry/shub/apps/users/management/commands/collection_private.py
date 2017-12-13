@@ -34,25 +34,33 @@ from django.core.management.base import (
     CommandError
 )
 
+#from shub.apps.main.query import collection_query
 from shub.apps.users.models import User
+from shub.apps.main.models import Collection
+from django.db.models import Q
 from shub.logger import bot
 import re
 
 class Command(BaseCommand):
-    '''add admin will add admin and manager privs singularity 
+    '''add superuser will add admin and manager privs singularity 
     registry. The super user is an admin that can build, delete,
     and manage images
     '''
     def add_arguments(self, parser):
         # Positional arguments
         parser.add_argument('--username', dest='username', default=None, type=str)
+        parser.add_argument('--collection', dest='collection', default=None, type=str)
 
-    help = "Generates an admin for the registry."
+    help = "Change collection privacy."
     def handle(self,*args, **options):
         if options['username'] is None:
             raise CommandError("Please provide a username with --username")
 
+        if options['collection'] is None:
+            raise CommandError("Please provide a collection with --collection")
+
         bot.debug("Username: %s" %options['username']) 
+        bot.debug("Collection: %s" %options['collection']) 
 
         try:
             user = User.objects.get(username=options['username'])
@@ -61,3 +69,16 @@ class Command(BaseCommand):
 
         if user.admin:
             bot.debug("Username: %s is admin" %options['username']) 
+#            results = collection_query(options['collection'])
+            results = Collection.objects.filter(Q(name__contains=options['collection']))
+            for result in results:
+                if not result.private:
+                    result.private = True
+                    result.save()
+                    bot.debug("Collection: %s. Visibility changed to private" %options['collection']) 
+        else:
+            bot.debug("Username: %s is not admin" %options['username']) 
+
+
+
+

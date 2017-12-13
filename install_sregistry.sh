@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [[ $EUID -ne 0 ]]; then
-   echo "This script must be run as root" 1>&2
-   exit 1
-fi
+#if [[ $EUID -ne 0 ]]; then
+#   echo "This script must be run as root" 1>&2
+#   exit 1
+#fi
 
 ROOT_DIR=$PWD
 BUILD_DIR=$ROOT_DIR/build
@@ -14,6 +14,8 @@ EXTERNAL_IP=$(/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ pri
 LOCALHOST_IP="127.0.0.1"
 
 mkdir -p $ROOT_DIR $BUILD_DIR
+
+if false; then
 
 echo ""
 echo "Updating Ubuntu repositories. Please wait ..."
@@ -99,8 +101,8 @@ tar xvf singularity-$VERSION.tar.gz
 cd singularity-$VERSION
 ./configure --prefix=/usr/local
 make
-sudo make install
-
+make install
+fi
 
 #############################################################################
 # SRegistry: web service

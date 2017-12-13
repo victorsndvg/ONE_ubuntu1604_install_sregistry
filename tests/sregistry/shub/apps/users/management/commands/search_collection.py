@@ -34,30 +34,40 @@ from django.core.management.base import (
     CommandError
 )
 
-from shub.apps.users.models import User
+#from shub.apps.main.query import collection_query
+from shub.apps.main.models import Collection
+from django.db.models import Q
 from shub.logger import bot
 import re
 
 class Command(BaseCommand):
-    '''add admin will add admin and manager privs singularity 
+    '''add superuser will add admin and manager privs singularity 
     registry. The super user is an admin that can build, delete,
     and manage images
     '''
     def add_arguments(self, parser):
         # Positional arguments
-        parser.add_argument('--username', dest='username', default=None, type=str)
+        parser.add_argument('--collection', dest='collection', default=None, type=str)
 
-    help = "Generates an admin for the registry."
+    help = "Search for a collection."
     def handle(self,*args, **options):
-        if options['username'] is None:
-            raise CommandError("Please provide a username with --username")
+        if options['collection'] is None:
+            raise CommandError("Please provide a username with --collection")
 
-        bot.debug("Username: %s" %options['username']) 
+        bot.debug("Collection: %s" %options['collection']) 
 
-        try:
-            user = User.objects.get(username=options['username'])
-        except User.DoesNotExist:
-            raise CommandError("This username does not exist.")
+#        results = collection_query(options['collection'])
+        results = Collection.objects.filter(Q(name__contains=options['collection']))
+        for result in results:
+            print(type(result))
+            print("    uri: "+result.get_uri())
+            print("    url: "+result.get_absolute_url())
+            print("    private display:"+result.get_private_display())
+#            print("    collection star:"+collection.has_collection_star())
+#            print("    edit permission:"+collection.has_edit_permission())
+#            print("    view permission:"+collection.has_view_permission())
+#            print("    owner:"+collection.owner)
+#            print("    owner id:"+collection.owner_id)
+            print("    private:"+str(result.private))
 
-        if user.admin:
-            bot.debug("Username: %s is admin" %options['username']) 
+

@@ -28,18 +28,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 '''
-
 from django.core.management.base import (
     BaseCommand,
     CommandError
 )
 
 from shub.apps.users.models import User
+from shub.apps.main.models import Collection
+from shub.apps.main.utils import get_collection_users
 from shub.logger import bot
 import re
 
 class Command(BaseCommand):
-    '''add admin will add admin and manager privs singularity 
+    '''add superuser will add admin and manager privs singularity 
     registry. The super user is an admin that can build, delete,
     and manage images
     '''
@@ -47,7 +48,7 @@ class Command(BaseCommand):
         # Positional arguments
         parser.add_argument('--username', dest='username', default=None, type=str)
 
-    help = "Generates an admin for the registry."
+    help = "Generates a superuser for the registry."
     def handle(self,*args, **options):
         if options['username'] is None:
             raise CommandError("Please provide a username with --username")
@@ -59,5 +60,27 @@ class Command(BaseCommand):
         except User.DoesNotExist:
             raise CommandError("This username does not exist.")
 
-        if user.admin:
-            bot.debug("Username: %s is admin" %options['username']) 
+        print(user.get_username())
+        print(user.get_full_name())
+        print(user.get_session_auth_hash())
+        print("authenticated: "+str(user.is_authenticated()))
+#        print(dir(user))
+#        user.email_user("SREGISTRY", "MASSAGE", from_email="registry@cesga.es")
+
+
+#        context = validate_credentials(user=user)
+#        collection = Collection.objects.filter(owner=user)
+        collections = Collection.objects.filter()
+        for collection in collections:
+            print(type(collection))
+            print("    uri: "+collection.get_uri())
+            print("    url: "+collection.get_absolute_url())
+            print("    private display:"+collection.get_private_display())
+#            print("    collection star:"+collection.has_collection_star())
+#            print("    edit permission:"+collection.has_edit_permission())
+#            print("    view permission:"+collection.has_view_permission())
+#            print("    owner:"+collection.owner)
+#            print("    owner id:"+collection.owner_id)
+            print("    private:"+str(collection.private))
+
+
